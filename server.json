@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.musevate/mcp",
+  "title": "Musevate",
+  "description": "Text, image and reference-to-video across many AI video models. Musevate account required.",
+  "version": "1.0.0",
+  "websiteUrl": "https://musevate.com",
+  "icons": [
+    {
+      "src": "https://musevate.com/icon.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "512x512"
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://musevate.com/api/mcp"
+    }
+  ]
+}
