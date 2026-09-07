@@ -24,6 +24,58 @@ prefer a static credential can send an API key from Settings instead:
 
 Both routes reach the same tools. Neither is preferred.
 
+### By client
+
+**Claude** (web, desktop or mobile) — Settings, Connectors, Add custom
+connector, and paste the endpoint. The sign-in happens in the browser.
+
+**Claude Code**
+
+    claude mcp add --transport http musevate https://musevate.com/api/mcp
+
+**ChatGPT** — Settings, Connectors, add a custom connector with the same URL.
+
+**Anything else that speaks streamable HTTP** — point it at the endpoint. If
+the client has no OAuth support, give it the header instead:
+
+```json
+{
+  "mcpServers": {
+    "musevate": {
+      "type": "http",
+      "url": "https://musevate.com/api/mcp",
+      "headers": { "Authorization": "Bearer mv_live_..." }
+    }
+  }
+}
+```
+
+### Checking it by hand
+
+The transport is plain JSON-RPC over `POST`; there is no session to establish
+and no stream to hold open.
+
+```bash
+curl -s https://musevate.com/api/mcp \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  -H "authorization: Bearer $MUSEVATE_API_KEY" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+Without the header that returns `401` and the `WWW-Authenticate` pointing at
+`/.well-known/oauth-protected-resource`, which is exactly what a connector
+follows to start the sign-in.
+
+[`examples/generate.mjs`](examples/generate.mjs) runs the whole flow — balance,
+quote, generate, poll — in about a hundred lines and no dependencies:
+
+```bash
+export MUSEVATE_API_KEY=mv_live_...
+node examples/generate.mjs "a slow dolly through a neon-lit street at night"
+node examples/generate.mjs "the logo turns to face us" https://example.com/logo.png
+```
+
 ## Tools
 
 | Tool | Cost | What it does |
