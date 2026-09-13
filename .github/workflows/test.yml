@@ -1,0 +1,37 @@
+# The suite that proves the framing, run on every push.
+#
+# The bridge's whole job is framing -- a notification answered with silence,
+# one line per message, a gateway error page turned into JSON-RPC rather than
+# raw HTML on stdout. Those are easy to break and invisible when broken, which
+# is exactly the kind of thing that should not depend on somebody remembering
+# to run `npm test` before pushing.
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The floor the package claims in `engines`, and current.
+        node: ["18", "22", "24"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      # --ignore-scripts so `prepare` does not build before the sources are
+      # in place; the build is the next step and should be its own failure.
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: node --test "test/**/*.test.js"
