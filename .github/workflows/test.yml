@@ -34,4 +34,4 @@ jobs:
       # in place; the build is the next step and should be its own failure.
       - run: npm ci --ignore-scripts
       - run: npm run build
-      - run: node --test "test/**/*.test.js"
+      - run: npm test

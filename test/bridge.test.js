@@ -138,3 +138,21 @@ test("every answer is exactly one line", async () => {
     assert.ok(out !== null && !out.includes("\n"), `left a newline in: ${out}`);
   }
 });
+
+/**
+ * `npm test` names its files rather than globbing them, because `node --test`
+ * only learned glob patterns in Node 21 and this package supports 18. Naming
+ * them means a new file is silently not run, so this fails until it is added.
+ */
+test("every test file is named by the npm test script", async () => {
+  const { readdirSync, readFileSync } = await import("node:fs");
+  const { fileURLToPath } = await import("node:url");
+  const dir = fileURLToPath(new URL(".", import.meta.url));
+  const pkg = JSON.parse(readFileSync(fileURLToPath(new URL("../package.json", import.meta.url)), "utf8"));
+  for (const file of readdirSync(dir).filter((f) => f.endsWith(".test.js"))) {
+    assert.ok(
+      pkg.scripts.test.includes(`test/${file}`),
+      `test/${file} exists but "npm test" does not run it`,
+    );
+  }
+});

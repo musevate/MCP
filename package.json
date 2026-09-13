@@ -35,7 +35,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "test": "npm run build && node --test \"test/**/*.test.js\"",
+    "test": "npm run build && node --test test/bridge.test.js",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
