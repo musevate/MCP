@@ -4,7 +4,7 @@ Generate video from a prompt, from an image, or from a set of reference images,
 through one endpoint that routes across the field of AI video models.
 
 **Endpoint:** `https://musevate.com/api/mcp` (streamable-http)
-**Package:** [`musevate-mcp`](https://www.npmjs.com/package/musevate-mcp) — a local stdio bridge, for clients that cannot speak streamable HTTP
+**Bridge:** `musevate-mcp` in this repository — a local stdio server, for clients that cannot speak streamable HTTP
 **Registry:** [`com.musevate/mcp`](https://registry.modelcontextprotocol.io/v0/servers?search=musevate) on the official MCP registry
 **Website:** [musevate.com](https://musevate.com)
 
@@ -61,12 +61,16 @@ those, `musevate-mcp` is a stdio server that forwards to the same endpoint:
   "mcpServers": {
     "musevate": {
       "command": "npx",
-      "args": ["-y", "musevate-mcp"],
+      "args": ["-y", "github:musevate/MCP"],
       "env": { "MUSEVATE_API_KEY": "mv_live_..." }
     }
   }
 }
 ```
+
+It installs and builds itself from this repository. An npm release under the
+name `musevate-mcp` is coming; until it lands, the line above is the one that
+works, and it will keep working afterwards.
 
 Create the key at [musevate.com/settings](https://musevate.com/settings). The
 bridge cannot run the OAuth flow -- that needs a browser, which a pipe does not
