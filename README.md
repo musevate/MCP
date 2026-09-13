@@ -4,13 +4,14 @@ Generate video from a prompt, from an image, or from a set of reference images,
 through one endpoint that routes across the field of AI video models.
 
 **Endpoint:** `https://musevate.com/api/mcp` (streamable-http)
+**Package:** [`musevate-mcp`](https://www.npmjs.com/package/musevate-mcp) — a local stdio bridge, for clients that cannot speak streamable HTTP
 **Registry:** [`com.musevate/mcp`](https://registry.modelcontextprotocol.io/v0/servers?search=musevate) on the official MCP registry
 **Website:** [musevate.com](https://musevate.com)
 
-This repository is documentation and the published manifest. The server itself
-is hosted; there is nothing to install and nothing to run.
+The server is hosted. There are two ways to reach it, and the first is better
+whenever your client supports it.
 
-## Connecting
+## Connecting directly
 
 Add `https://musevate.com/api/mcp` as a custom connector. Every method requires
 an account, so the first request is refused with `401` and a `WWW-Authenticate`
@@ -49,6 +50,48 @@ the client has no OAuth support, give it the header instead:
   }
 }
 ```
+
+## Connecting through the local bridge
+
+Some clients only know how to launch a command and talk to it over a pipe. For
+those, `musevate-mcp` is a stdio server that forwards to the same endpoint:
+
+```json
+{
+  "mcpServers": {
+    "musevate": {
+      "command": "npx",
+      "args": ["-y", "musevate-mcp"],
+      "env": { "MUSEVATE_API_KEY": "mv_live_..." }
+    }
+  }
+}
+```
+
+Create the key at [musevate.com/settings](https://musevate.com/settings). The
+bridge cannot run the OAuth flow -- that needs a browser, which a pipe does not
+have -- so it takes a key and nothing else.
+
+It holds no logic of its own: no pricing, no retry rules, no opinion about what
+the tools do. Adding any would create a second place where "what does this
+cost" is decided, and two such places drift apart. It moves bytes and gets the
+framing right, which is most of what a bridge gets wrong:
+
+- A notification is answered with silence, never with a response to a request
+  the client never made.
+- Every answer is re-serialised to exactly one line, so a pretty-printed body
+  is not read as several malformed messages.
+- A gateway error page, an empty body or a dead network becomes a JSON-RPC
+  error carrying the id the client is waiting on -- never raw HTML on the
+  protocol channel, and never a hang.
+
+Environment:
+
+| Variable | Default | |
+|---|---|---|
+| `MUSEVATE_API_KEY` | — | required; `--api-key` also works |
+| `MUSEVATE_MCP_URL` | `https://musevate.com/api/mcp` | for testing against another deployment |
+| `MUSEVATE_TIMEOUT_MS` | `180000` | above the server's own 120s ceiling |
 
 ### Checking it by hand
 
@@ -123,11 +166,26 @@ it runs and refunded automatically if it fails for a technical reason.
 
 Details at [musevate.com/pricing](https://musevate.com/pricing).
 
+## Building the bridge
+
+```bash
+npm install
+npm test      # builds, then runs the suite
+```
+
+`src/bridge.ts` is the whole translation, as one function over strings, so the
+cases that are awkward to reach through a real pipe are reachable from a test.
+`src/index.ts` holds only what needs a process: the pipe, the environment, the
+exit.
+
 ## What this repository is, and is not
 
-This is the manifest published to the registry and the documentation for using
-the hosted server. The product source is not here.
+This is the local bridge, the manifest published to the registry, and the
+documentation for using the hosted server.
 
-The MIT licence covers **these files** -- the documentation and the manifest.
-It is not a licence to the Musevate service, which is a paid product governed
-by its own [terms](https://musevate.com/terms).
+The product source is not here, and the bridge is not a reimplementation of it:
+routing, pricing, the margin floor and the refund rules all live in the service.
+
+The MIT licence covers **these files** -- the bridge, the documentation and the
+manifest. It is not a licence to the Musevate service, which is a paid product
+governed by its own [terms](https://musevate.com/terms).

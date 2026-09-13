@@ -1,0 +1,23 @@
+{
+  "name": "musevate-mcp",
+  "version": "1.0.0",
+  "description": "Local stdio bridge to the hosted Musevate MCP server: generate video from a prompt, an image, or reference images across many AI video models.",
+  "keywords": ["mcp", "modelcontextprotocol", "ai-video", "text-to-video", "image-to-video", "stdio", "bridge"],
+  "homepage": "https://musevate.com",
+  "repository": { "type": "git", "url": "git+https://github.com/musevate/MCP.git" },
+  "bugs": { "url": "https://github.com/musevate/MCP/issues" },
+  "license": "MIT",
+  "type": "module",
+  "bin": { "musevate-mcp": "dist/index.js" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test \"test/**/*.test.js\"",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
